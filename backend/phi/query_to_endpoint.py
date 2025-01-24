@@ -48,20 +48,19 @@ class F1QueryResponse(BaseModel):
     }
 
 def create_understanding_agent():
-    """Create an agent that understands and extracts parameters from queries"""
+    """Create an agent that understands what data is needed for visualization"""
     return Agent(
         model=openai,
-        description="You are a Formula 1 data analyst who understands what data is needed to create visualizations and comparisons",
+        description="You are a Formula 1 data analyst who determines exactly what data points are needed for visualization",
         output_model=QueryParameters,
         instructions=[
-            "Think like a data analyst building a analytics dashboard",
-            "For driver comparisons, consider what metrics need to be tracked (wins, points, podiums, etc.)",
-            "For temporal analysis, determine the granularity needed (race-by-race, season totals, etc.)",
-            "Consider what data structures would be needed to create meaningful visualizations",
-            "Break down complex queries into required data points for comparison",
-            "For 'last N seasons', calculate exact years (e.g., 'last 5' means 2019-2023)",
-            "Format identifiers consistently (lowercase with underscores)",
-            "Think about what standings/statistics are needed for a complete analysis"
+            "First identify the exact subjects (e.g., specific drivers, constructors)",
+            "Then list the precise metrics needed (e.g., wins, points, podiums)",
+            "Calculate exact time periods (e.g., 'last 5 seasons' = 2019-2023)",
+            "Format all identifiers as lowercase with underscores (e.g., lewis_hamilton)",
+            "Think about the data structure needed for visualization (e.g., time series of points)",
+            "Consider what granularity of data is needed (season totals vs race-by-race)",
+            "Identify if we need cumulative stats or individual race results"
         ]
     )
 
@@ -69,18 +68,19 @@ def create_endpoint_agent():
     """Create an agent that maps parameters to Ergast API endpoints"""
     return Agent(
         model=openai,
-        description="You are a Formula 1 data engineer who knows exactly which endpoints provide the necessary data for analysis",
+        description="You are a Formula 1 data engineer who picks the minimal set of endpoints needed",
         output_model=F1QueryResponse,
         instructions=[
-            "For driver comparisons, use driver standings endpoints to get championship positions and points",
-            "When comparing specific metrics (wins, podiums), use driver standings for season totals",
-            "For detailed race-by-race analysis, include race results endpoints",
-            "Always include driver standings endpoints for overall performance metrics",
-            "Use constructor standings when team performance is relevant",
-            "Include qualifying results if race performance analysis is needed",
-            "Always include .json suffix and limit=1000 for large datasets",
-            "Explain why each endpoint is needed for the analysis",
-            "Consider what data joins would be needed to create a complete analysis"
+            "Pick endpoints based on data granularity needed:",
+            "- Use /driverStandings for season-end totals (wins, points, position)",
+            "- Use /results for race-by-race performance",
+            "- Use /qualifying for qualifying performance",
+            "Always format URLs with:",
+            "- .json suffix",
+            "- Correct year parameter",
+            "- Proper driver/constructor IDs",
+            "Only select endpoints that directly contribute to the visualization",
+            "Explain exactly how each endpoint's data will be used"
         ]
     )
 
@@ -90,35 +90,34 @@ def process_query(query: str) -> List[str]:
         # Step 1: Extract structured parameters
         understanding_agent = create_understanding_agent()
         params_response = understanding_agent.run(f"""
-        As a Formula 1 data analyst, analyze this query and determine what data we need:
+        As a Formula 1 data analyst, determine exactly what data points we need:
         "{query}"
         
-        Think about:
-        - What metrics need to be compared (wins, points, podiums, etc.)
-        - What granularity of data is needed (race-by-race, season totals)
-        - What data structures would help visualize this comparison
-        - What additional context might be needed for meaningful analysis
-        - How to track performance trends over the specified time period
+        Break down systematically:
+        1. Subjects: Which specific drivers/constructors?
+        2. Metrics: What exact statistics are needed?
+        3. Time Period: Which specific years?
+        4. Granularity: Do we need season totals or race-by-race data?
+        5. Visualization: What data structure would we need to create the visualization?
         """)
         
         # Step 2: Map to endpoints
         endpoint_agent = create_endpoint_agent()
         result_response = endpoint_agent.run(f"""
-        Based on this analysis, determine which endpoints will provide the necessary data:
+        Based on these data requirements, select the minimal set of endpoints needed:
         {params_response.content.model_dump_json()}
         
-        Available endpoints:
-        1. Driver Standings: http://ergast.com/api/f1/{{year}}/driverStandings.json
-        2. Constructor Standings: http://ergast.com/api/f1/{{year}}/constructorStandings.json
-        3. Race Results: http://ergast.com/api/f1/{{year}}/{{round}}/results.json
-        4. Driver Results: http://ergast.com/api/f1/drivers/{{driver}}/results.json
-        5. Season Results: http://ergast.com/api/f1/{{year}}/results.json
+        Core endpoints and their data:
+        1. /driverStandings - Season-end totals (wins, points, position)
+        2. /results - Individual race results
+        3. /qualifying - Qualifying performance
+        4. /laps - Lap time data
+        5. /pitstops - Pit stop data
         
         Remember:
-        - Driver standings provide cumulative season statistics
-        - Race results provide race-by-race performance data
-        - Include all endpoints needed for a complete analysis
-        - Consider what data will be needed for visualization
+        - Only select endpoints that directly provide needed data
+        - Format: http://ergast.com/api/f1/{{year}}/[endpoint].json
+        - Add parameters only if needed (e.g., driver, round)
         """)
         
         # Output results
@@ -141,4 +140,4 @@ def test_queries(indices: List[int]):
         process_query(query)
 
 if __name__ == "__main__":
-    test_queries([29]) 
+    test_queries([30]) 
