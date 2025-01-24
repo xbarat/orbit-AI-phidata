@@ -23,6 +23,19 @@ Workflow Components
 	•	Input: Endpoint(s) and parameters from the query processor.
 	•	Output: Raw data in JSON format.
 
+	API Response Design:
+	MRData
+  	└── StandingsTable
+      ├── season
+      └── StandingsLists
+          └── DriverStandings
+              ├── position
+              ├── points
+              ├── wins
+              └── Driver
+                  ├── givenName
+                  └── familyName
+
 3. Data Transformation
 	•	Purpose: Clean, process, and aggregate raw data into structured formats.
 	•	Implementation:
