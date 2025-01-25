@@ -127,45 +127,54 @@ async def fetch_data(urls: List[str]) -> List[Dict]:
     
     return [response.data for response in responses]
 
-# Example usage:
+# Example usage
 if __name__ == "__main__":
-    from query_to_endpoint import process_query
+    from query_to_endpoint import process_query, query_index
     import asyncio
     
-    async def main():
-        # Get endpoints from query processor
-        query = "How does Lewis Hamilton compare to Charles Leclerc in terms of wins, podiums, and points over the last 5 seasons?"
-        endpoints = process_query(query)
+    async def test_fetch(query: str) -> None:
+        """Test data fetching for a given query"""
+        print(f"\nQuery: {query}")
         
+        # Get endpoints from query processor
+        endpoints = process_query(query)
         print("\nFetching data from endpoints...")
+        
+        # Fetch data
         responses = await fetch_data(endpoints)
         
         # Print results
         print("\nFetched Data:")
-        for i, data in enumerate(responses):
-            print(f"\nResponse {i+1}:")
+        for i, data in enumerate(responses, 1):
+            print(f"\nResponse {i}:")
             mrdata = data.get('MRData', {})
             if mrdata:
-                # Extract season from StandingsTable
-                standings_table = mrdata.get('StandingsTable', {})
-                season = standings_table.get('season', 'Unknown')
-                standings_lists = standings_table.get('StandingsLists', [])
-                
-                print(f"Season: {season}")
-                print(f"Total Drivers: {mrdata.get('total', '0')}")
-                
-                # Display driver standings if available
-                if standings_lists:
-                    driver_standings = standings_lists[0].get('DriverStandings', [])
-                    print("Driver Standings:")
-                    for standing in driver_standings:
-                        driver = standing.get('Driver', {})
-                        driver_name = f"{driver.get('givenName', '')} {driver.get('familyName', '')}"
-                        points = standing.get('points', '0')
-                        position = standing.get('position', 'N/A')
-                        wins = standing.get('wins', '0')
-                        print(f"  {position}. {driver_name}: Points={points}, Wins={wins}")
+                # Extract and display key information based on data type
+                if 'StandingsTable' in mrdata:
+                    table = mrdata['StandingsTable']
+                    print(f"Season: {table.get('season', 'Unknown')}")
+                    standings_lists = table.get('StandingsLists', [])
+                    if standings_lists:
+                        print(f"Total Drivers: {len(standings_lists[0].get('DriverStandings', []))}")
+                elif 'RaceTable' in mrdata:
+                    table = mrdata['RaceTable']
+                    print(f"Season: {table.get('season', 'Unknown')}")
+                    races = table.get('Races', [])
+                    if races:
+                        print(f"Round: {races[0].get('round', 'Unknown')}")
+                        print(f"Race: {races[0].get('raceName', 'Unknown')}")
             else:
                 print("No MRData found in response")
     
-    asyncio.run(main()) 
+    async def test_queries(indices: List[int]) -> None:
+        """Test data fetching with query indices"""
+        queries = query_index.get_queries(indices)
+        for query in queries:
+            try:
+                await test_fetch(query)
+                print("\n" + "="*80)  # Separator between test cases
+            except Exception as e:
+                print(f"Error processing query: {str(e)}")
+    
+    # Run test with specific query indices
+    asyncio.run(test_queries([32])) 

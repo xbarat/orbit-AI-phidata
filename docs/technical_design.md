@@ -23,7 +23,7 @@ Workflow Components
 	•	Input: Endpoint(s) and parameters from the query processor.
 	•	Output: Raw data in JSON format.
 
-	API Response Design:
+	*API Response Design:*
 	MRData
   	└── StandingsTable
       ├── season
@@ -46,6 +46,26 @@ Workflow Components
 	•	Add error handling for missing or inconsistent data.
 	•	Input: Raw data from API responses.
 	•	Output: Structured DataFrame ready for analysis.
+
+
+	*DataFrame Design:*
+	season: int
+	driver_id: str
+	driver_name: str
+	constructor: str
+	position: int
+	points: float
+	wins: int
+
+	*DataFrame Example:*
+	                          constructor  position  points  wins  driver_name
+	season  driver_id                                                       
+	2023    hamilton         Mercedes     ...       ...     ...   Lewis Hamilton
+    	    leclerc          Ferrari      ...       ...     ...   Charles Leclerc
+	2022    hamilton         Mercedes     ...       ...     ...   Lewis Hamilton
+    	    leclerc          Ferrari      ...       ...     ...   Charles Leclerc
+
+
 
 4. Analysis
 	•	Purpose: Perform analytical computations based on the query type.
