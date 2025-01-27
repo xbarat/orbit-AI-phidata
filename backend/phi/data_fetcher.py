@@ -177,4 +177,4 @@ if __name__ == "__main__":
                 print(f"Error processing query: {str(e)}")
     
     # Run test with specific query indices
-    asyncio.run(test_queries([32])) 
+    asyncio.run(test_queries([34])) 
