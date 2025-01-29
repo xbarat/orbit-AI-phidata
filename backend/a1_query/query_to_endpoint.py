@@ -1,10 +1,17 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Literal, Any
 from pydantic import BaseModel, Field
 from phi.agent import Agent
 from phi.model.openai import OpenAIChat
 import os
 from dotenv import load_dotenv
 from .query_index import query_index
+from .url_builder import ErgastURLBuilder
+from .models import (
+    QueryParameters,
+    EndpointInfo,
+    F1QueryResponse,
+    QueryType
+)
 
 # Load environment variables
 load_dotenv()
@@ -12,55 +19,90 @@ load_dotenv()
 # Get API key from environment variable
 openai = OpenAIChat(api_key=os.getenv('OPENAI_API_KEY'))
 
-class QueryParameters(BaseModel):
-    """Parameters extracted from the query"""
-    action: str = Field(description="Type of action: fetch, compare, analyze")
-    entity: str = Field(description="Target entity: driver, constructor, race")
-    parameters: Dict = Field(default_factory=dict, description="Extracted parameters like driver names, years")
-    temporal: Optional[Dict] = Field(default=None, description="Temporal aspects like season ranges")
+class EntityInfo(BaseModel):
+    """Information about entities in the query"""
+    drivers: List[str] = Field(default_factory=list, description="List of driver IDs (e.g., lewis_hamilton)")
+    constructors: List[str] = Field(default_factory=list, description="List of constructor IDs (e.g., mercedes)")
+    circuits: List[str] = Field(default_factory=list, description="List of circuit IDs (e.g., monza)")
+    years: List[str] = Field(default_factory=list, description="List of years to query")
+    rounds: List[str] = Field(default_factory=list, description="List of specific rounds if needed")
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "action": "compare",
-                "entity": "driver",
-                "parameters": {"drivers": ["lewis_hamilton", "max_verstappen"]},
-                "temporal": {"type": "range", "years": ["2021", "2022", "2023"]}
-            }
-        }
-    }
-
-class F1QueryResponse(BaseModel):
-    """Final response with endpoints"""
-    endpoints: List[str] = Field(default_factory=list, description="List of complete Ergast API URLs needed")
-    explanation: str = Field(default="", description="Brief explanation of why these endpoints are needed")
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "endpoints": [
-                    "http://ergast.com/api/f1/2023/driverStandings.json",
-                    "http://ergast.com/api/f1/2022/driverStandings.json"
-                ],
-                "explanation": "Need driver standings from 2022-2023 to compare performance"
-            }
-        }
-    }
+class MetricRequirement(BaseModel):
+    """Specific metrics needed from the data"""
+    race_results: bool = Field(default=False, description="Need race results data")
+    qualifying: bool = Field(default=False, description="Need qualifying data")
+    lap_times: bool = Field(default=False, description="Need lap timing data")
+    pit_stops: bool = Field(default=False, description="Need pit stop data")
+    standings: bool = Field(default=False, description="Need standings data")
+    status: bool = Field(default=False, description="Need race status/finishing data")
 
 def create_understanding_agent():
-    """Create an agent that understands what data is needed for visualization"""
+    """Create an agent focused solely on extracting structured parameters"""
     return Agent(
         model=openai,
-        description="You are a Formula 1 data analyst who determines exactly what data points are needed for visualization",
+        description="Expert Formula 1 query analyzer that extracts entities and metrics",
         output_model=QueryParameters,
         instructions=[
-            "First identify the exact subjects (e.g., specific drivers, constructors, circuits)",
-            "Then list the precise metrics needed (e.g., wins, points, podiums, laps, pitstops, finishing status)",
-            "Calculate exact time periods (e.g., 'last 5 seasons' = 2019-2023)",
-            "Format all identifiers as lowercase with underscores (e.g., lewis_hamilton)",
-            "Think about the data structure needed for visualization (e.g., time series of points)",
-            "Consider what granularity of data is needed (season totals vs race-by-race)",
-            "Identify if we need cumulative stats or individual race results"
+            "Query Analysis Protocol:",
+            "1. Entity Identification:",
+            "   - Drivers: Convert to lowercase IDs (Fernando Alonso → fernando_alonso)",
+            "   - Circuits: Use official circuit IDs (Silverstone → silverstone)",
+            "   - Constructors: Official team IDs (Aston Martin → aston_martin)",
+            "",
+            "2. Temporal Analysis:",
+            "   - Explicit years: Set time_scope.years=[2018, 2019, 2020]",
+            "   - Year range: Set time_scope.range=[2018, 2020]",
+            "   - Relative: Set time_scope.last=5 for 'last 5 seasons'",
+            "   - Default: time_scope.years=[current_year] if not specified",
+            "",
+            "3. Metric Detection:",
+            "   - Race results → metrics=['results']",
+            "   - Qualifying → metrics=['qualifying']",
+            "   - Standings → metrics=['standings']",
+            "   - Status/DNF → metrics=['status']",
+            "",
+            "4. Output Format:",
+            "   primary_entity: 'driver' | 'constructor' | 'circuit' | 'season'",
+            "   entity_ids: {",
+            "     'drivers': ['alonso', 'hamilton'],",
+            "     'circuits': ['silverstone'],",
+            "     'constructors': []",
+            "   }",
+            "   metrics: ['results', 'qualifying', etc]",
+            "   time_scope: {",
+            "     'years': [2020, 2021, 2022] or",
+            "     'range': [2020, 2022] or",
+            "     'last': 5",
+            "   }",
+            "   comparison: true/false",
+            "Time Scope Handling:",
+            "- 'in a given season' → time_scope.years=[current_year]",
+            "- 'this season' → time_scope.years=[current_year]",
+            "- 'last season' → time_scope.years=[current_year-1]",
+            
+            "Metric Mapping:",
+            "- 'qualifying position' → metrics=['qualifying']",
+            "- 'grid position' → metrics=['qualifying']",
+            "- 'pole positions' → metrics=['qualifying']",
+            
+            "Driver ID Formatting:",
+            "- First and last name: 'oscar_piastri'",
+            "- Last name only: Append first name if known",
+            "Qualifying Query Examples:",
+            "1. 'average qualifying position':",
+            "   primary_entity: 'driver'",
+            "   entity_ids: {'drivers': ['oscar_piastri']}",
+            "   metrics: ['qualifying']",
+            "   time_scope: {'years': [2024]}",
+            "",
+            "2. 'qualifying performance':",
+            "   metrics: ['qualifying']",
+            "   Add 'qualifying' to metrics for any grid/position/pole related queries",
+            "",
+            "3. Default Behaviors:",
+            "   - 'in a given season' → Use current year",
+            "   - 'qualifying' → Always include in metrics",
+            "   - Driver names → Convert to lowercase with underscore",
         ]
     )
 
@@ -68,70 +110,65 @@ def create_endpoint_agent():
     """Create an agent that maps parameters to Ergast API endpoints"""
     return Agent(
         model=openai,
-        description="You are a Formula 1 data engineer who picks the minimal set of endpoints needed",
+        description="You are a Formula 1 data engineer who determines the optimal endpoint strategy",
         output_model=F1QueryResponse,
         instructions=[
-            "Pick endpoints based on data granularity needed:",
-            "- Use /driverStandings for season-end totals (wins, points, position)",
-            "- Use /results for race-by-race performance",
-            "- Use /qualifying for qualifying performance",
-            "- Use /circuits for circuit data",
-            "- Use /laps for lap time data",
-            "- Use /pitstops for pit stop data",
-            "- Use /finishingStatus for finishing status data",
-            "Always format URLs with:",
-            "- .json suffix",
-            "- Correct year parameter",
-            "- Proper driver/constructor IDs",
-            "Only select endpoints that directly contribute to the visualization",
-            "Explain exactly how each endpoint's data will be used"
+            "Endpoint Construction Rules:",
+            "1. Base Patterns:",
+            "   - Driver-focused: /f1/{year}/drivers/{driverId}/results.json",
+            "   - Circuit-focused: /f1/circuits/{circuitId}/{year}/results.json",
+            "   - Constructor-focused: /f1/constructors/{constructorId}/{year}/results.json",
+            "   - Comparison: Multiple driver/constructor endpoints",
+            "",
+            "2. Temporal Handling:",
+            "   - For multi-year requests: One endpoint per year",
+            "   - Season ranges: 2018-2023 → separate yearly endpoints",
+            "",
+            "3. Data Composition:",
+            "   - Pit stops require /lapTimes endpoints",
+            "   - Standings need /driverStandings and /constructorStandings",
+            "",
+            "4. Filtering Guidance:",
+            "Example: For 'Alonso at Silverstone':",
+            "1. First get all Silverstone races: /f1/circuits/silverstone/races.json",
+            "2. For each race year: /f1/{year}/circuits/silverstone/results.json?driver=alonso",
+            "3. Add status endpoint for each race: /f1/{year}/{round}/status.json"
         ]
     )
 
 def process_query(query: str) -> List[str]:
     """Process an F1 query and return relevant Ergast API endpoint URLs"""
     try:
-        # Step 1: Extract structured parameters
+        # Step 1: Extract structured parameters using the understanding agent
         understanding_agent = create_understanding_agent()
         params_response = understanding_agent.run(f"""
-        As a Formula 1 data analyst, determine exactly what data points we need:
+        Analyze this Formula 1 query:
         "{query}"
-        
-        Break down systematically:
-        1. Subjects: Which specific drivers/constructors?
-        2. Metrics: What exact statistics are needed?
-        3. Time Period: Which specific years?
-        4. Granularity: Do we need season totals or race-by-race data?
-        5. Visualization: What data structure would we need to create the visualization?
+
+        Follow the systematic analysis framework to determine exact data requirements.
+        Ensure all identifiers are properly formatted (lowercase with underscores).
+        Consider any implicit requirements that might need filtering or post-processing.
         """)
         
-        # Step 2: Map to endpoints
-        endpoint_agent = create_endpoint_agent()
-        result_response = endpoint_agent.run(f"""
-        Based on these data requirements, select the minimal set of endpoints needed:
-        {params_response.content.model_dump_json()}
+        # Debug logging
+        print("\nExtracted Parameters:")
+        print(f"Primary Entity: {params_response.content.primary_entity}")
+        print(f"Entity IDs: {params_response.content.entity_ids}")
+        print(f"Metrics: {params_response.content.metrics}")
+        print(f"Time Scope: {params_response.content.time_scope}")
+        print(f"Comparison: {params_response.content.comparison}")
         
-        Core endpoints and their data:
-        1. /driverStandings - Season-end totals (wins, points, position)
-        2. /results - Individual race results
-        3. /qualifying - Qualifying performance
-        4. /laps - Lap time data
-        5. /pitstops - Pit stop data
-        
-        Remember:
-        - Only select endpoints that directly provide needed data
-        - Format: http://ergast.com/api/f1/{{year}}/[endpoint].json
-        - Add parameters only if needed (e.g., driver, round)
-        """)
+        # New rule-based URL construction
+        url_builder = ErgastURLBuilder()
+        endpoints = url_builder.build_endpoints(params_response.content)
         
         # Output results
         print(f"\nQuery: {query}")
         print("Required Endpoints:")
-        for url in result_response.content.endpoints:
-            print(f"- {url}")
-        print(f"Explanation: {result_response.content.explanation}")
+        for endpoint in endpoints:
+            print(f"- {endpoint}")
         
-        return result_response.content.endpoints
+        return endpoints
         
     except Exception as e:
         print(f"Error processing query: {str(e)}")
