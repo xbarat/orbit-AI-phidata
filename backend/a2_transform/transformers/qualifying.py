@@ -49,6 +49,18 @@ def process_qualifying_data(races):
     
     return pd.DataFrame(rows)
 
+class QualifyingTransformer:
+    def transform(self, endpoint: str) -> pd.DataFrame:
+        """Transform qualifying data from endpoint URL to DataFrame"""
+        # Extract parameters from endpoint URL
+        parts = endpoint.split('/')
+        year = parts[5]
+        round_num = parts[6] if len(parts) > 6 else None
+        
+        # Fetch data
+        races = fetch_qualifying_data(year, round_num)
+        return process_qualifying_data(races)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='F1 Qualifying Processor')
     parser.add_argument('--year', type=int, required=True, help='Season year')
@@ -64,10 +76,3 @@ if __name__ == "__main__":
         # df.to_csv(f"f1_qualifying_{args.year}_{args.round or 'all'}.csv", index=False)
     else:
         print("No data processed")
-
-# Step 5: Display the DataFrame
-print(df.head())
-print(df.shape)
-
-# Optional: Save to CSV
-# df.to_csv("f1_2022_round1_qualifying.csv", index=False)

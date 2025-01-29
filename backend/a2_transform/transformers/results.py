@@ -32,8 +32,8 @@ def process_results_data(races):
             'season': race.get('season'),
             'race_name': race.get('raceName'),
             'circuit_id': race.get('Circuit', {}).get('circuitId'),
-            'date': race.get('Date'),
-            'time': race.get('Time')
+            'date': race.get('date'),
+            'time': race.get('time')
         }
         
         for result in race.get('Results', []):
@@ -61,6 +61,18 @@ def try_int(value):
         return int(value) if value and str(value).isdigit() else None
     except:
         return None
+
+class RaceResultsTransformer:
+    def transform(self, endpoint: str) -> pd.DataFrame:
+        """Transform race results data from endpoint URL to DataFrame"""
+        # Extract parameters from endpoint URL
+        parts = endpoint.split('/')
+        year = parts[5]
+        round_num = parts[6] if len(parts) > 6 and not parts[6].startswith('drivers') else None
+        
+        # Fetch and process data
+        races = fetch_race_results(year, round_num)
+        return process_results_data(races)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='F1 Results Processor')

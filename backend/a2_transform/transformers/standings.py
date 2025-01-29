@@ -61,6 +61,18 @@ def process_standings(standings_lists, standing_type: str):
     
     return pd.DataFrame(rows)
 
+class StandingsTransformer:
+    def transform(self, endpoint: str) -> pd.DataFrame:
+        """Transform standings data from endpoint URL to DataFrame"""
+        # Extract parameters from endpoint
+        parts = endpoint.split('/')
+        year = parts[5]
+        standing_type = 'driver' if 'driverStandings' in endpoint else 'constructor'
+        
+        # Fetch and process data
+        standings_lists = fetch_standings(year, standing_type)
+        return process_standings(standings_lists, standing_type)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='F1 Standings Processor')
     parser.add_argument('--year', type=int, required=True, help='Season year')
