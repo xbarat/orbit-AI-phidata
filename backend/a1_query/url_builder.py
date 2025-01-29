@@ -8,6 +8,7 @@ class ErgastURLBuilder:
     
     def __init__(self):
         self.current_year = datetime.datetime.now().year
+        self.primary_entity = None
 
     def build_endpoints(self, params: QueryParameters) -> List[str]:
         """Main entry point for endpoint construction"""
@@ -21,6 +22,9 @@ class ErgastURLBuilder:
         drivers = params.entity_ids.get('drivers', [])
         constructors = params.entity_ids.get('constructors', [])
         circuits = params.entity_ids.get('circuits', [])
+        
+        # Set primary entity from params
+        self.primary_entity = params.primary_entity
         
         # Build endpoints per metric type
         for metric in params.metrics:
@@ -75,23 +79,24 @@ class ErgastURLBuilder:
         """Construct standings endpoints"""
         urls = []
         
-        # Driver standings
+        # Only generate endpoints based on the primary entity type
         if drivers:
+            # Driver standings
             for year in years:
                 for driver in drivers:
                     urls.append(f"{self.BASE_URL}/{year}/drivers/{driver}/driverStandings.json")
-        else:
-            for year in years:
-                urls.append(f"{self.BASE_URL}/{year}/driverStandings.json")
-        
-        # Constructor standings
-        if constructors:
+        elif constructors:
+            # Constructor standings
             for year in years:
                 for constructor in constructors:
                     urls.append(f"{self.BASE_URL}/{year}/constructors/{constructor}/constructorStandings.json")
         else:
+            # If no specific entities, use the primary_entity to determine which standings to get
             for year in years:
-                urls.append(f"{self.BASE_URL}/{year}/constructorStandings.json")
+                if self.primary_entity == 'driver':
+                    urls.append(f"{self.BASE_URL}/{year}/driverStandings.json")
+                elif self.primary_entity == 'constructor':
+                    urls.append(f"{self.BASE_URL}/{year}/constructorStandings.json")
         
         return urls
 
@@ -127,19 +132,47 @@ class ErgastURLBuilder:
     def _build_status_endpoints(self, years, rounds, drivers, constructors, circuits):
         """Construct status endpoints"""
         urls = []
+        
+        # Get current year if no years specified
+        if not years:
+            years = [self.current_year]
+        
         for year in years:
-            if rounds:
-                for round_num in rounds:
-                    urls.append(f"{self.BASE_URL}/{year}/{round_num}/status.json")
+            # Constructor-specific status
+            if constructors:
+                for constructor in constructors:
+                    urls.append(f"{self.BASE_URL}/{year}/constructors/{constructor}/status.json")
+            # Driver-specific status
+            elif drivers:
+                for driver in drivers:
+                    urls.append(f"{self.BASE_URL}/{year}/drivers/{driver}/status.json")
+            # General status for the year
+            else:
+                urls.append(f"{self.BASE_URL}/{year}/status.json")
+        
         return urls
 
     def _build_lap_endpoints(self, years, rounds, drivers, constructors, circuits):
-        """Construct lap endpoints"""
+        """Construct lap endpoints according to Ergast API spec"""
         urls = []
+        
+        # Get current year if no years specified
+        if not years:
+            years = [self.current_year]
+        
         for year in years:
+            # For fastest lap analysis, we only need the final lap data
+            # or a sample of laps from each race (e.g., every 10th lap)
             if rounds:
                 for round_num in rounds:
                     urls.append(f"{self.BASE_URL}/{year}/{round_num}/laps.json")
+            else:
+                # Instead of all rounds (1-23), get data from representative races
+                # For example: First, middle, and last race of each season
+                season_rounds = [1, 12, 20]  # Representative sample
+                for round_num in season_rounds:
+                    urls.append(f"{self.BASE_URL}/{year}/{round_num}/laps.json")
+        
         return urls
 
     def _build_pitstop_endpoints(self, years, rounds, drivers, constructors, circuits):

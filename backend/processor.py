@@ -4,6 +4,7 @@ from a1_query.query_to_endpoint import process_query
 from a2_transform import EndpointRouter
 import sys
 import os
+import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 from a1_query.url_validator import ErgastEndpointValidator
@@ -61,6 +62,22 @@ def test_query(index: int):
     else:
         print(f"No query found for index {index}")
 
-# Test the minimal version
+def main():
+    parser = argparse.ArgumentParser(description='F1 Query Processor')
+    parser.add_argument('index', type=int, nargs='?', default=23,
+                       help='Query index number to test (default: 23)')
+    parser.add_argument('-l', '--list', action='store_true',
+                       help='List all available queries')
+    
+    args = parser.parse_args()
+    
+    if args.list:
+        print("\nAvailable Queries:")
+        for idx, query in query_index.queries.items():
+            print(f"[{idx}] {query}")
+        return
+    
+    test_query(args.index)
+
 if __name__ == "__main__":
-    test_query(23)  # Using the same test index as query_to_endpoint.py 
+    main() 

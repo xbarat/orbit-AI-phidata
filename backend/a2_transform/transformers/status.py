@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 import argparse
 from typing import Optional
+from .base import BaseTransformer
 
 def fetch_lap_timings(year: str, round_num: str, lap_number: str):
     """Fetch lap timing data from Ergast API"""
@@ -49,86 +50,49 @@ def process_lap_timings(race_data):
 
     return pd.DataFrame(rows)
 
-class StatusTransformer:
+class StatusTransformer(BaseTransformer):
     def transform(self, endpoint: str) -> pd.DataFrame:
         """Transform status data from endpoint URL to DataFrame"""
-        # Extract parameters from endpoint
-        parts = endpoint.split('/')
-        year = parts[5]
-        
-        if 'laps' in endpoint:
-            if len(parts) > 8 and parts[8].endswith('.json'):
-                lap_number = parts[8].replace('.json', '')
-                round_num = parts[6]
-                return self._process_laps(year, round_num, lap_number)
-            else:
-                # Handle all laps case
-                round_num = parts[6]
-                return self._process_all_laps(year, round_num)
-        else:
-            # Handle status endpoint
-            round_num = parts[6]
-            return self._process_status(year, round_num)
-
-    def _process_laps(self, year: str, round_num: str, lap_number: str) -> pd.DataFrame:
-        """Process specific lap data"""
-        race_data = fetch_lap_timings(year, round_num, lap_number)
-        return process_lap_timings(race_data)
-
-    def _process_all_laps(self, year: str, round_num: str) -> pd.DataFrame:
-        """Process all laps data"""
         try:
-            url = f"http://ergast.com/api/f1/{year}/{round_num}/laps.json"
-            response = requests.get(url)
+            response = requests.get(endpoint)
             response.raise_for_status()
-            data = response.json()
-            races = data['MRData']['RaceTable']['Races']
-            if not races:
+            data = response.json()['MRData']['StatusTable']
+            
+            # Get season from the data
+            season = data.get('season', '')
+            
+            # Get status data
+            status_data = data.get('Status', [])
+            if not status_data:
                 return pd.DataFrame()
             
-            all_laps_data = []
-            for race in races:
-                for lap in race['Laps']:
-                    lap_data = {**race}  # Copy race info
-                    lap_data['Laps'] = [lap]  # Replace with single lap
-                    all_laps_data.append(process_lap_timings(lap_data))
-            
-            return pd.concat(all_laps_data, ignore_index=True) if all_laps_data else pd.DataFrame()
-        except Exception as e:
-            print(f"Error processing all laps: {e}")
-            return pd.DataFrame()
-
-    def _process_status(self, year: str, round_num: str) -> pd.DataFrame:
-        """Process race status data"""
-        try:
-            url = f"http://ergast.com/api/f1/{year}/{round_num}/status.json"
-            response = requests.get(url)
-            response.raise_for_status()
-            data = response.json()
-            races = data['MRData']['RaceTable']['Races']
-            if not races:
-                return pd.DataFrame()
-
             rows = []
-            for race in races:
-                circuit_info = race['Circuit']
-                for result in race['Results']:
-                    rows.append({
-                        'season': race['season'],
-                        'round': race['round'],
-                        'race_name': race['raceName'],
-                        'circuit_id': circuit_info['circuitId'],
-                        'circuit_name': circuit_info['circuitName'],
-                        'driver_id': result['Driver']['driverId'],
-                        'driver_name': f"{result['Driver']['givenName']} {result['Driver']['familyName']}",
-                        'constructor_id': result['Constructor']['constructorId'],
-                        'status': result['status'],
-                        'position': int(result['position']) if 'position' in result else None,
-                        'laps_completed': int(result['laps']) if 'laps' in result else None
-                    })
-            return pd.DataFrame(rows)
+            for status in status_data:
+                rows.append({
+                    'season': season,
+                    'status_id': status.get('statusId', ''),
+                    'status': status.get('status', ''),
+                    'count': int(status.get('count', 0))
+                })
+            
+            df = pd.DataFrame(rows)
+            
+            if not df.empty:
+                # Filter for DNF-related statuses if needed
+                dnf_keywords = ['Accident', 'Mechanical', 'Engine', 'Gearbox', 'Retired', 'DNF', 'Collision']
+                df['is_dnf'] = df['status'].str.contains('|'.join(dnf_keywords), case=False)
+                
+                # Add summary stats
+                df['total_races'] = df['count'].sum()
+                df['dnf_rate'] = df[df['is_dnf']]['count'].sum() / df['total_races']
+                
+                # Sort by count
+                df = df.sort_values('count', ascending=False)
+            
+            return df
+            
         except Exception as e:
-            print(f"Error processing status: {e}")
+            print(f"Error processing status: {str(e)}")
             return pd.DataFrame()
 
 if __name__ == "__main__":
