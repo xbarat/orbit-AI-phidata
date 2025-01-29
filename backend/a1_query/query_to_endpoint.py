@@ -4,7 +4,7 @@ from phi.agent import Agent
 from phi.model.openai import OpenAIChat
 import os
 from dotenv import load_dotenv
-from query_index import query_index
+from .query_index import query_index
 
 # Load environment variables
 load_dotenv()
