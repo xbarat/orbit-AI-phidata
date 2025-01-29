@@ -65,6 +65,11 @@ class StandingsTransformer(BaseTransformer):
             # Determine standings type from endpoint
             standing_type = 'driver' if 'driver' in endpoint.lower() else 'constructor'
             
+            # Extract driver ID from URL if present
+            driver_id = None
+            if '/drivers/' in endpoint:
+                driver_id = endpoint.split('/drivers/')[1].split('/')[0]
+            
             response = requests.get(endpoint)
             response.raise_for_status()
             data = response.json()['MRData']['StandingsTable']
@@ -82,6 +87,11 @@ class StandingsTransformer(BaseTransformer):
                     for standing in standing_list.get('DriverStandings', []):
                         driver = standing.get('Driver', {})
                         constructor = standing.get('Constructors', [{}])[0]
+                        
+                        # Skip if not the requested driver
+                        if driver_id and driver.get('driverId') != driver_id:
+                            continue
+                            
                         rows.append({
                             'season': season,
                             'round': standing_list.get('round', ''),
@@ -108,7 +118,6 @@ class StandingsTransformer(BaseTransformer):
             
             df = pd.DataFrame(rows)
             if not df.empty:
-                # Sort by position
                 df = df.sort_values(['season', 'position'])
             
             return df

@@ -2,6 +2,8 @@ from typing import List, Dict, Optional
 from urllib.parse import urlencode
 import datetime
 from .models import QueryParameters
+from .driver_mapping import DriverIDMapper
+from .url_validator import ErgastEndpointValidator
 
 class ErgastURLBuilder:
     BASE_URL = "http://ergast.com/api/f1"
@@ -79,24 +81,16 @@ class ErgastURLBuilder:
         """Construct standings endpoints"""
         urls = []
         
-        # Only generate endpoints based on the primary entity type
-        if drivers:
-            # Driver standings
-            for year in years:
-                for driver in drivers:
-                    urls.append(f"{self.BASE_URL}/{year}/drivers/{driver}/driverStandings.json")
-        elif constructors:
-            # Constructor standings
-            for year in years:
-                for constructor in constructors:
-                    urls.append(f"{self.BASE_URL}/{year}/constructors/{constructor}/constructorStandings.json")
-        else:
-            # If no specific entities, use the primary_entity to determine which standings to get
-            for year in years:
-                if self.primary_entity == 'driver':
-                    urls.append(f"{self.BASE_URL}/{year}/driverStandings.json")
-                elif self.primary_entity == 'constructor':
-                    urls.append(f"{self.BASE_URL}/{year}/constructorStandings.json")
+        # Get current year if no years specified
+        if not years:
+            years = [self.current_year]
+        
+        for year in years:
+            # Get general standings and filter by entity in transformer
+            if self.primary_entity == 'driver' or drivers:
+                urls.append(f"{self.BASE_URL}/{year}/driverStandings.json")
+            elif self.primary_entity == 'constructor' or constructors:
+                urls.append(f"{self.BASE_URL}/{year}/constructorStandings.json")
         
         return urls
 
@@ -104,27 +98,25 @@ class ErgastURLBuilder:
         """Construct qualifying endpoints"""
         urls = []
         
-        # Get current year if no years specified
-        if not years:
-            years = [self.current_year]
-        
         for year in years:
             # Driver-specific qualifying
             if drivers:
                 for driver in drivers:
-                    # Try both formats
-                    urls.extend([
-                        f"{self.BASE_URL}/{year}/qualifying.json?driver={driver}",
-                        f"{self.BASE_URL}/{year}/drivers/{driver}/qualifying.json"
-                    ])
-            
+                    # Debug print
+                    print(f"Original driver ID: {driver}")
+                    ergast_driver = ErgastEndpointValidator.DRIVER_MAPPINGS.get(driver, driver)
+                    print(f"Mapped driver ID: {ergast_driver}")
+                    urls.append(f"{self.BASE_URL}/{year}/drivers/{ergast_driver}/qualifying.json")
+            # Constructor-specific qualifying
+            elif constructors:
+                for constructor in constructors:
+                    urls.append(f"{self.BASE_URL}/{year}/constructors/{constructor}/qualifying.json")
             # Circuit-specific qualifying
-            if circuits:
+            elif circuits:
                 for circuit in circuits:
                     urls.append(f"{self.BASE_URL}/{year}/circuits/{circuit}/qualifying.json")
-            
             # If no specific entities, get all qualifying for the year
-            if not (drivers or circuits):
+            else:
                 urls.append(f"{self.BASE_URL}/{year}/qualifying.json")
         
         return urls
@@ -215,6 +207,5 @@ class ErgastURLBuilder:
 
     def _validate_endpoints(self, endpoints: List[str]) -> List[str]:
         """Apply validation rules"""
-        from .url_validator import ErgastEndpointValidator
         validator = ErgastEndpointValidator()
         return [ep for ep in endpoints if validator.validate(ep)] 
