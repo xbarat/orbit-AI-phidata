@@ -1,12 +1,10 @@
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
 from phi.agent import Agent
-from phi.model.openai import OpenAIChat
+from a1_query.model.openai import OpenAIChat
 import os
 from dotenv import load_dotenv
 from query_index import query_index
-import pandas as pd
-import uuid
 
 # Load environment variables
 load_dotenv()
@@ -49,12 +47,6 @@ class F1QueryResponse(BaseModel):
         }
     }
 
-class EndpointProcessingRequest(BaseModel):
-    """Request for processing endpoints through transformers"""
-    endpoints: List[str] = Field(..., description="List of Ergast API URLs to process")
-    output_format: str = Field(default="dataframe", description="Output format (dataframe or csv)")
-    merge_strategy: Optional[str] = Field(default=None, description="How to combine multiple datasets")
-
 def create_understanding_agent():
     """Create an agent that understands what data is needed for visualization"""
     return Agent(
@@ -96,8 +88,8 @@ def create_endpoint_agent():
         ]
     )
 
-def process_query(query: str) -> Dict[str, pd.DataFrame]:
-    """Process an F1 query and return processed DataFrames"""
+def process_query(query: str) -> List[str]:
+    """Process an F1 query and return relevant Ergast API endpoint URLs"""
     try:
         # Step 1: Extract structured parameters
         understanding_agent = create_understanding_agent()
@@ -122,11 +114,9 @@ def process_query(query: str) -> Dict[str, pd.DataFrame]:
         Core endpoints and their data:
         1. /driverStandings - Season-end totals (wins, points, position)
         2. /results - Individual race results
-        3. /circuits - Circuit data
-        4. /qualifying - Qualifying performance
-        5. /laps - Lap time data
-        6. /pitstops - Pit stop data
-        7. /finishingStatus - Finishing status data
+        3. /qualifying - Qualifying performance
+        4. /laps - Lap time data
+        5. /pitstops - Pit stop data
         
         Remember:
         - Only select endpoints that directly provide needed data
@@ -134,25 +124,18 @@ def process_query(query: str) -> Dict[str, pd.DataFrame]:
         - Add parameters only if needed (e.g., driver, round)
         """)
         
-        # Create processing request
-        processing_request = EndpointProcessingRequest(
-            endpoints=result_response.content.endpoints,
-            output_format="dataframe",
-            merge_strategy="auto"
-        )
+        # Output results
+        print(f"\nQuery: {query}")
+        print("Required Endpoints:")
+        for url in result_response.content.endpoints:
+            print(f"- {url}")
+        print(f"Explanation: {result_response.content.explanation}")
         
-        # Process endpoints through transformers
-        result_dfs = process_endpoints(processing_request)
-        
-        print(f"\nGenerated {len(result_dfs)} datasets:")
-        for key, df in result_dfs.items():
-            print(f"- {key}: {df.shape} rows")
-        
-        return result_dfs
+        return result_response.content.endpoints
         
     except Exception as e:
         print(f"Error processing query: {str(e)}")
-        return {}
+        return []
 
 def test_queries(indices: List[int]):
     """Test the F1 query processor with query indices"""
@@ -160,70 +143,5 @@ def test_queries(indices: List[int]):
     for query in queries:
         process_query(query)
 
-def route_endpoint_to_transformer(url: str) -> tuple:
-    """Map API endpoints to transformer functions and parameters"""
-    endpoint_map = {
-        'results': ('transform_results', 'process_results_data'),
-        'driverStandings': ('transform_standings', 'fetch_and_process_standings'),
-        'constructorStandings': ('transform_standings', 'fetch_and_process_standings'),
-        'laps': ('transform_status', 'fetch_and_process_lap_timings'),
-        'qualifying': ('transform_qualifying', 'process_qualifying_data'),
-        'pitstops': ('transform_pitstops', 'process_pitstop_data'),
-        'finishingStatus': ('transform_status', 'process_finishing_status')
-    }
-    
-    # Extract endpoint type from URL
-    endpoint_type = next(
-        (et for et in endpoint_map if f'/{et}' in url),
-        'unknown'
-    )
-    
-    # Extract parameters from URL
-    parts = url.replace('.json', '').split('/')
-    year = parts[-3] if parts[-3].isdigit() else None
-    round_num = parts[-2] if parts[-2].isdigit() else None
-    lap_number = parts[-1] if endpoint_type == 'laps' and parts[-1].isdigit() else None
-    
-    return endpoint_map.get(endpoint_type, (None, None)), {
-        'year': int(year) if year else None,
-        'round_num': int(round_num) if round_num else None,
-        'lap_number': int(lap_number) if lap_number else None
-    }
-
-def process_endpoints(request: EndpointProcessingRequest) -> Dict[str, pd.DataFrame]:
-    """Process endpoints through appropriate transformers"""
-    dfs = {}
-    
-    for url in request.endpoints:
-        # Route endpoint to transformer
-        (module_name, func_name), params = route_endpoint_to_transformer(url)
-        if not module_name or not func_name:
-            print(f"No transformer found for {url}")
-            continue
-            
-        try:
-            # Import transformer module
-            module = __import__(f"backend.qhi2.{module_name}", fromlist=[func_name])
-            transformer_func = getattr(module, func_name)
-            
-            # Call transformer with parameters
-            if module_name == 'transform_standings':
-                df = transformer_func(params['standing_type'])
-            else:
-                df = transformer_func(
-                    year=params['year'],
-                    round_num=params['round_num'],
-                    lap_number=params.get('lap_number')
-                )
-                
-            # Store result
-            key = f"{module_name}_{uuid.uuid4().hex[:6]}"
-            dfs[key] = df
-            
-        except Exception as e:
-            print(f"Error processing {url}: {str(e)}")
-    
-    return dfs
-
 if __name__ == "__main__":
-    test_queries([30]) 
+    test_queries([29]) 
