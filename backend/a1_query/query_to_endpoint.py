@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
 from phi.agent import Agent
-from a1_query.model.openai import OpenAIChat
+from phi.model.openai import OpenAIChat
 import os
 from dotenv import load_dotenv
 from query_index import query_index

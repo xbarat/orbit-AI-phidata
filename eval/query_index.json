@@ -1,0 +1,375 @@
+{
+  "total_queries": 74,
+  "queries": {
+    "0": {
+      "query": "How has Ferrari's win rate changed since 2015?",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "1": {
+      "query": "What are Red Bull's podium finishes from 2010 to 2023?",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "2": {
+      "query": "Which driver has the most wins in wet races since 2000?",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "3": {
+      "query": "How many wins does Hamilton have each season since 2014?",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "4": {
+      "query": "Which team dominated constructors' championships from 2010 to 2020?",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "5": {
+      "query": "Show Mercedes' win percentage over the last decade.",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "6": {
+      "query": "How have the fastest lap times changed in Monaco since 2010?",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "7": {
+      "query": "What is the historical win trend of Verstappen?",
+      "source": "query-history.txt",
+      "category": "history"
+    },
+    "8": {
+      "query": "How has Mercedes' win rate changed since 2010?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "9": {
+      "query": "Which driver has won the most races in wet conditions since 2005?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "10": {
+      "query": "What are Red Bull's podium finishes by year from 2015 to 2023?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "11": {
+      "query": "How many races has Hamilton won each season since 2014?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "12": {
+      "query": "Which team dominated constructors' championships from 2000 to 2010?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "13": {
+      "query": "Show the fastest lap times in Monaco for each season since 2010.",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "14": {
+      "query": "How many DNFs has Ferrari had in the last 5 seasons?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "15": {
+      "query": "What is the historical trend for fastest laps set by Verstappen since his debut?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "16": {
+      "query": "How many pole positions did Red Bull achieve during the Vettel era (2010-2013)?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "17": {
+      "query": "Which driver has the most points without winning a championship since 1990?",
+      "source": "query-history-advanced.txt",
+      "category": "history-advanced"
+    },
+    "18": {
+      "query": "How has Max Verstappen's rank changed across the last 10 seasons?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "19": {
+      "query": "What were Sergio P\u00e9rez's key stats (wins, poles, fastest laps) for each season?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "20": {
+      "query": "What is Carlos Sainz Jr.'s average qualifying position across all races in a given season?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "21": {
+      "query": "How has Lewis Hamilton's rank changed across the last 10 seasons?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "22": {
+      "query": "What were George Russell's key stats (wins, poles, fastest laps) for each season?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "23": {
+      "query": "What is Oscar Piastri's average qualifying position across all races in a given season?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "24": {
+      "query": "What is Charles Leclerc's average lap time consistency across all races in a season?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "25": {
+      "query": "How often does Fernando Alonso finish in the top 5 after starting outside the top 10?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "26": {
+      "query": "What is Valtteri Bottas's average lap time consistency across all races in a season?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "27": {
+      "query": "How often does Charles Leclerc finish in the top 5 after starting outside the top 10?",
+      "source": "query-focus-basic.txt",
+      "category": "focus-basic"
+    },
+    "28": {
+      "query": "How does Lewis Hamilton compare to Charles Leclerc in terms of wins, podiums, and points over the last 5 seasons?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "29": {
+      "query": "What is Fernando Alonso's performance (wins, fastest laps, podiums) on Circuit Silverstone over the past seasons?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "30": {
+      "query": "How does Lando Norris perform in wet vs. dry conditions (wins, DNFs, lap times)?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "31": {
+      "query": "How does George Russell compare to his teammate in points, podiums, and wins for the last 3 seasons?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "32": {
+      "query": "How has Oscar Piastri performed in races with safety car interventions (positions gained/lost)?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "33": {
+      "query": "How does Max Verstappen compare to Fernando Alonso in terms of wins, podiums, and points over the last 5 seasons?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "34": {
+      "query": "What is Lando Norris's performance (wins, fastest laps, podiums) on Circuit Monaco over the past seasons?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "35": {
+      "query": "How does Valtteri Bottas perform in wet vs. dry conditions (wins, DNFs, lap times)?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "36": {
+      "query": "How does Sergio P\u00e9rez compare to his teammate in points, podiums, and wins for the last 3 seasons?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "37": {
+      "query": "How has Carlos Sainz Jr. performed in races with safety car interventions (positions gained/lost)?",
+      "source": "query-focus-advanced.txt",
+      "category": "focus-advanced"
+    },
+    "38": {
+      "query": "Compare Verstappen's performance in rainy races vs dry races in the last 5 seasons, but only counting races where he qualified in top 3",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "39": {
+      "query": "Calculate the correlation between pit stop times and final race position for Mercedes in races where it rained during qualifying but was dry during the race",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "40": {
+      "query": "Show me races where Ferrari outperformed Red Bull in qualifying but lost the race, focusing on tire strategy differences in 2023",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "41": {
+      "query": "Compare Verstappen, Hamilton, and Alonso's performance in the last 3 laps of races where all three finished on podium",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "42": {
+      "query": "Compare lap times between P1 and P20 in Monaco 2023 but only in sectors where yellow flags were shown",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "43": {
+      "query": "Find races where a driver started outside top 10 but won the race, then compare their tire strategies with P2 finisher",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "44": {
+      "query": "Who performed better in their rookie season - Hamilton or Verstappen?",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "45": {
+      "query": "Show me the average gap between teammates in qualifying but only count sessions where track temperature was above 40\u00b0C and both cars made it to Q3",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "46": {
+      "query": "How would the 2023 championship standings look if we only counted races where all drivers finished?",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "47": {
+      "query": "Compare every driver who has ever won a race in wet conditions since F1 began, ranked by win percentage",
+      "source": "query-edge.txt",
+      "category": "edge"
+    },
+    "48": {
+      "query": "Which driver performs best in the rain?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "49": {
+      "query": "Who is the fastest driver in Monaco?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "50": {
+      "query": "What team has improved the most over the last 5 seasons?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "51": {
+      "query": "Which constructor is the best on street circuits?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "52": {
+      "query": "What is Hamilton's success rate at circuits where Verstappen also won?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "53": {
+      "query": "Which races had the closest finishes in F1 history?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "54": {
+      "query": "How does Ferrari perform compared to Red Bull in wet conditions?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "55": {
+      "query": "What is the average finishing position for Alonso in 2023?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "56": {
+      "query": "Which races had safety cars deployed in 2022?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "57": {
+      "query": "Who are the best drivers on tire conservation strategies?",
+      "source": "query-ambiguous.txt",
+      "category": "ambiguous"
+    },
+    "58": {
+      "query": "Compare Verstappen and Hamilton's wins in 2023.",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "59": {
+      "query": "Who has more podium finishes: Leclerc or Norris in 2023?",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "60": {
+      "query": "Compare lap times between Verstappen and Alonso in Monaco 2023.",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "61": {
+      "query": "Which driver performed better in the rain: Verstappen or Russell?",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "62": {
+      "query": "How does Verstappen's pole position percentage compare to Hamilton's in 2023?",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "63": {
+      "query": "Compare Verstappen and Hamilton in terms of race wins and fastest laps.",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "64": {
+      "query": "Who had the better average qualifying position: Norris or Sainz?",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "65": {
+      "query": "Compare Leclerc and Perez's DNFs in 2023.",
+      "source": "query-comparison.txt",
+      "category": "comparison"
+    },
+    "66": {
+      "query": "Who won the most races in 2023?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    },
+    "67": {
+      "query": "What is the fastest lap time recorded in 2023?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    },
+    "68": {
+      "query": "Which team has the most podium finishes this season?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    },
+    "69": {
+      "query": "How many races has Verstappen won in 2023?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    },
+    "70": {
+      "query": "What is the average lap time for Hamilton in 2023?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    },
+    "71": {
+      "query": "Which driver has the highest pole position percentage in 2023?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    },
+    "72": {
+      "query": "How many races were won by Ferrari in 2022?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    },
+    "73": {
+      "query": "Who leads the driver standings in 2023?",
+      "source": "query-stats.txt",
+      "category": "stats"
+    }
+  }
+}
