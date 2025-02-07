@@ -1,64 +1,83 @@
-# F1 Data Query Pipeline
+# **Orbit-2: Lightweight AI Query-to-Data Pipeline**  
 
-A natural language interface for querying Formula 1 race data using the Ergast API.
+## **🚀 What is Orbit-2?**  
+Orbit-2 is a **faster, streamlined version of Orbit**, focusing **exclusively on backend efficiency** using **Phidata and agentic frameworks**. Unlike its predecessor, **Orbit-2 prioritizes direct transformations** instead of complex multi-step pipelines.
 
-## Setup
+It is designed to:  
+✅ **Map queries to the right API endpoints** (minimal API calls, optimized selection)  
+✅ **Fetch & transform data quickly** (avoids deep retrieval layers)  
+✅ **Process structured outputs directly** (no excessive pipeline overhead)  
+✅ **Ensure high retrieval accuracy with modular agents**  
 
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
+💡 **Why Orbit-2?**  
+- Eliminates **slow frontend bottlenecks**  
+- Removes **large pipelines & unnecessary retrieval steps**  
+- Focuses **purely on structured query-to-data transformation**  
+
+---
+
+## **🔹 Key Features & System Design**  
+
+🚀 **Agentic Query Processing** → Uses **Phidata** for modular agents  
+🚀 **Fast Data Transformations** → Direct **Pandas-based** processing, avoiding LLM overhead  
+🚀 **Minimal API Calls** → Smarter **endpoint selection for efficiency**  
+🚀 **Cross-Domain Testing** → Built for **F1 queries**, tested on **finance, government, and climate data**  
+
+---
+
+## **📊 Performance Metrics**  
+
+| **Capability** | **Best Accuracy** | **Challenges** |
+|---------------|------------------|---------------|
+| Query → Multi-Endpoint Selection | **100%** | Uses Ontology Mapping, Context Layer |
+| Query → DataFrame | **96%** | Uses Transform for logic for all possible API endpoint; Not Scalable but easy to deploy for domain by domain |
+| DataFrame → Analytics Code | **not tested%** |  |
+
+---
+
+## **🛠️ Architecture & Workflow**  
+
+**Orbit-2 is built on a modular architecture with distinct processing agents:**  
+
+```mermaid
+graph TD
+    A[User Query] --> B[Query Agent]
+    B --> C[API Endpoint Selection]
+    C --> D[Data Fetching Agent]
+    D --> E[Data Processing Agent]
+    E --> F[Structured Output]
 ```
 
-2. Set up your OpenAI API key in a `.env` file:
-```bash
-OPENAI_API_KEY=your_api_key_here
-```
+🚀 **Key Enhancements Over Previous Versions**  
+✅ **Agent-Based Query Processing** → Handles query understanding & API mapping separately  
+✅ **Direct Data Transformation** → Avoids deep retrieval pipelines, simplifying processing  
+✅ **Optimized Endpoint Selection** → Smart filtering minimizes unnecessary API calls  
 
-## Usage
+---
 
-The pipeline can be run in three different modes:
+## **📦 Tech Stack**  
 
-### 1. Demo Mode
-Run a set of example queries to showcase different capabilities:
-```bash
-python backend/main.py --demo
-```
+✅ **Backend:** FastAPI, Phidata, Railway  
+✅ **Data Processing:** Pandas, NumPy  
+✅ **Agentic Framework:** Phidata Agents, LangChain (evaluated but not core)  
+✅ **Deployment:** Vercel (Frontend, deprecated), Railway (Backend)  
 
-### 2. Single Query Mode
-Process a specific query from the command line:
-```bash
-python backend/main.py --query "Show me Lewis Hamilton's race results from 2023"
-```
+---
+## **🔮 Next Steps & Enhancements**  
 
-### 3. Interactive Mode
-Start an interactive session where you can enter multiple queries:
-```bash
-python backend/main.py
-```
+🔹 **Improve Query → DataFrame Accuracy** (Reduce API failures & ID mismatches)  
+🔹 **Enhance Mathematical Processing for Analytics Code**  
+🔹 **Expand API Coverage to More Domains** (Beyond F1, integrate finance & climate)  
+🔹 **Introduce Lightweight Caching for Speed Boost**  
 
-## Example Queries
+---
 
-- "Show me Lewis Hamilton's race results from 2023"
-- "Compare Max Verstappen and Sergio Perez's performance in 2023"
-- "Get the qualifying results for the 2023 Monaco Grand Prix"
-- "Show me the driver standings after each race in 2023"
+## **📌 Why Orbit-2 Matters?**  
+Orbit-2 is built for **speed and efficiency**—it cuts out unnecessary steps and focuses purely on getting **structured, accurate insights from queries as fast as possible**.  
 
-## Features
+📌 **Ideal for:** Data engineers, AI practitioners, and backend developers **who need quick, accurate data transformation without deep pipelines.**  
 
-- Natural language query processing
-- Rich console output with formatted tables
-- Basic data analysis and statistics
-- Support for multiple F1 data types:
-  - Race results
-  - Driver standings
-  - Qualifying results
-  - Lap times and status
+---
 
-## Error Handling
-
-The pipeline includes comprehensive error handling:
-- Invalid queries
-- API connection issues
-- Data processing errors
-
-All errors are logged with detailed information for debugging. 
+### **💡 Final Takeaway**  
+Orbit-2 **simplifies query-to-data processing**, making it faster, **more modular**, and **more reliable** than its predecessor.
