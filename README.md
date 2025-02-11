@@ -36,6 +36,12 @@ Start an interactive session where you can enter multiple queries:
 python backend/main.py
 ```
 
+### 4. Streamlit Web Interface
+Run the web interface for an interactive experience:
+```bash
+streamlit run frontend/app.py
+```
+
 ## Example Queries
 
 - "Show me Lewis Hamilton's race results from 2023"
