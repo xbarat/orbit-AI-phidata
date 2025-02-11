@@ -4,7 +4,11 @@ from a1_query.query_to_endpoint import process_query
 from a2_transform import EndpointRouter
 import sys
 import os
+import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pandas as pd
+from a1_query.url_validator import ErgastEndpointValidator
+from a1_query.query_index import query_index
 
 # Set up basic logging
 logging.basicConfig(level=logging.INFO)
@@ -15,39 +19,65 @@ class F1QueryProcessor:
     
     def __init__(self):
         self.router = EndpointRouter()
+        self.validator = ErgastEndpointValidator()
     
-    def execute_query(self, query: str) -> List[str]:
+    def execute_query(self, query: str) -> List[pd.DataFrame]:
         """Core execution flow"""
         try:
-            # Step 1: Get endpoints using the existing process_query function
-            endpoints = process_query(query)
+            # Get validated endpoints
+            endpoints = [
+                ep for ep in process_query(query)
+                if self.validator.validate(ep)
+            ]
+            
             if not endpoints:
-                logger.warning("No endpoints generated for query: %s", query)
+                logger.error("No valid endpoints generated")
                 return []
             
-            # Step 2: Process each endpoint through the router
+            # Process each endpoint
             results = []
             for endpoint in endpoints:
-                logger.info("Processing endpoint: %s", endpoint)
-                transformer = self.router.get_transformer(endpoint)
-                if transformer:
-                    result = transformer.transform(endpoint)
-                    results.append(result)
+                if transformer := self.router.get_transformer(endpoint):
+                    results.append(transformer.transform(endpoint))
                 else:
-                    logger.warning("No transformer found for endpoint: %s", endpoint)
+                    logger.warning(f"No transformer for {endpoint}")
             
             return results
             
         except Exception as e:
-            logger.error("Processing failed: %s", str(e))
+            logger.exception("Processing failed")
             return []
 
-# Test the minimal version
-if __name__ == "__main__":
+def test_query(index: int):
+    """Test the F1 query processor with a specific query index"""
     processor = F1QueryProcessor()
-    test_query = "Show me Verstappen's 2023 race results and qualifying performances"
-    print("Testing query:", test_query)
-    results = processor.execute_query(test_query)
-    print("\nResults:")
-    for idx, result in enumerate(results, 1):
-        print(f"Result {idx}: {result}") 
+    query = query_index.get_query(index)
+    if query:
+        print(f"\nTesting Query [{index}]: {query}")
+        results = processor.execute_query(query)
+        print("\nResults:")
+        for idx, result in enumerate(results, 1):
+            print(f"Result {idx}:")
+            print(result.head() if isinstance(result, pd.DataFrame) else result)
+    else:
+        print(f"No query found for index {index}")
+
+def main():
+    parser = argparse.ArgumentParser(description='F1 Query Processor')
+    parser.add_argument('index', type=int, nargs='?', default=23,
+                       help='Query index number to test (default: 23)')
+    parser.add_argument('-l', '--list', action='store_true',
+                       help='List all available queries')
+    
+    args = parser.parse_args()
+    
+    if args.list:
+        print("\nAvailable Queries:")
+        for idx, query in query_index.queries.items():
+            print(f"[{idx}] {query}")
+        return
+    
+    test_query(args.index)
+
+if __name__ == "__main__":
+    main() 

@@ -1,6 +1,8 @@
 import pandas as pd
 import requests
 import argparse
+from typing import List, Dict, Optional
+from .base import BaseTransformer
 
 def fetch_standings(year: str, standing_type: str):
     """Fetch standings data from Ergast API"""
@@ -17,61 +19,112 @@ def fetch_standings(year: str, standing_type: str):
         print(f"Invalid JSON response: {e}")
         return []
 
-def process_standings(standings_lists, standing_type: str):
+def process_standings(standings_lists, standing_type='driver'):
     """Process standings data into DataFrame"""
-    if not standings_lists:
-        return pd.DataFrame()
-
-    standings = standings_lists[0]
-    season = standings['season']
-    round_number = standings['round']
     rows = []
-
-    for standing in standings.get(f'{standing_type.capitalize()}Standings', []):
-        row = {
-            'season': season,
-            'round': round_number,
-            'position': int(standing['position']),
-            'points': float(standing['points']),
-            'wins': int(standing['wins']),
-            'standing_type': standing_type
-        }
-
-        if standing_type == 'driver':
-            driver = standing['Driver']
-            constructor = standing['Constructors'][-1]
-            row.update({
-                'driver_id': driver['driverId'],
-                'driver_name': f"{driver['givenName']} {driver['familyName']}",
-                'driver_code': driver['code'],
-                'constructor_id': constructor['constructorId'],
-                'constructor_name': constructor['name'],
-                'nationality_driver': driver['nationality'],
-                'nationality_constructor': constructor['nationality']
-            })
-        else:
-            constructor = standing['Constructor']
-            row.update({
-                'constructor_id': constructor['constructorId'],
-                'constructor_name': constructor['name'],
-                'nationality_constructor': constructor['nationality']
-            })
+    for standings in standings_lists:
+        season = standings.get('season', '')
+        round_num = standings.get('round', '')
         
-        rows.append(row)
+        for standing in standings.get('StandingsLists', []):
+            if standing_type == 'driver':
+                for driver_standing in standing.get('DriverStandings', []):
+                    driver = driver_standing.get('Driver', {})
+                    constructor = driver_standing.get('Constructors', [{}])[0]
+                    rows.append({
+                        'season': season,
+                        'round': round_num,
+                        'position': driver_standing.get('position', ''),
+                        'points': driver_standing.get('points', ''),
+                        'wins': driver_standing.get('wins', ''),
+                        'driver_id': driver.get('driverId', ''),
+                        'driver_code': driver.get('code', driver.get('driverId', ''))[:3].upper(),  # Fallback to ID
+                        'driver_name': f"{driver.get('givenName', '')} {driver.get('familyName', '')}",
+                        'constructor': constructor.get('name', '')
+                    })
+            else:  # constructor standings
+                for const_standing in standing.get('ConstructorStandings', []):
+                    constructor = const_standing.get('Constructor', {})
+                    rows.append({
+                        'season': season,
+                        'round': round_num,
+                        'position': const_standing.get('position', ''),
+                        'points': const_standing.get('points', ''),
+                        'wins': const_standing.get('wins', ''),
+                        'constructor_id': constructor.get('constructorId', ''),
+                        'constructor_name': constructor.get('name', ''),
+                        'nationality': constructor.get('nationality', '')
+                    })
     
     return pd.DataFrame(rows)
 
-class StandingsTransformer:
+class StandingsTransformer(BaseTransformer):
     def transform(self, endpoint: str) -> pd.DataFrame:
         """Transform standings data from endpoint URL to DataFrame"""
-        # Extract parameters from endpoint
-        parts = endpoint.split('/')
-        year = parts[5]
-        standing_type = 'driver' if 'driverStandings' in endpoint else 'constructor'
-        
-        # Fetch and process data
-        standings_lists = fetch_standings(year, standing_type)
-        return process_standings(standings_lists, standing_type)
+        try:
+            # Determine standings type from endpoint
+            standing_type = 'driver' if 'driver' in endpoint.lower() else 'constructor'
+            
+            # Extract driver ID from URL if present
+            driver_id = None
+            if '/drivers/' in endpoint:
+                driver_id = endpoint.split('/drivers/')[1].split('/')[0]
+            
+            response = requests.get(endpoint)
+            response.raise_for_status()
+            data = response.json()['MRData']['StandingsTable']
+            
+            # Get season from the data
+            season = data.get('season', '')
+            standings_lists = data.get('StandingsLists', [])
+            
+            if not standings_lists:
+                return pd.DataFrame()
+            
+            rows = []
+            for standing_list in standings_lists:
+                if standing_type == 'driver':
+                    for standing in standing_list.get('DriverStandings', []):
+                        driver = standing.get('Driver', {})
+                        constructor = standing.get('Constructors', [{}])[0]
+                        
+                        # Skip if not the requested driver
+                        if driver_id and driver.get('driverId') != driver_id:
+                            continue
+                            
+                        rows.append({
+                            'season': season,
+                            'round': standing_list.get('round', ''),
+                            'position': int(standing.get('position', 0)),
+                            'points': float(standing.get('points', 0)),
+                            'wins': int(standing.get('wins', 0)),
+                            'driver_id': driver.get('driverId', ''),
+                            'driver_name': f"{driver.get('givenName', '')} {driver.get('familyName', '')}",
+                            'constructor': constructor.get('name', '')
+                        })
+                else:  # constructor standings
+                    for standing in standing_list.get('ConstructorStandings', []):
+                        constructor = standing.get('Constructor', {})
+                        rows.append({
+                            'season': season,
+                            'round': standing_list.get('round', ''),
+                            'position': int(standing.get('position', 0)),
+                            'points': float(standing.get('points', 0)),
+                            'wins': int(standing.get('wins', 0)),
+                            'constructor_id': constructor.get('constructorId', ''),
+                            'constructor_name': constructor.get('name', ''),
+                            'nationality': constructor.get('nationality', '')
+                        })
+            
+            df = pd.DataFrame(rows)
+            if not df.empty:
+                df = df.sort_values(['season', 'position'])
+            
+            return df
+            
+        except Exception as e:
+            print(f"Error processing standings data: {str(e)}")
+            return pd.DataFrame()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='F1 Standings Processor')

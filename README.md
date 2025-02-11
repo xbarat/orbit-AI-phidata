@@ -70,7 +70,17 @@ graph TD
 🔹 **Expand API Coverage to More Domains** (Beyond F1, integrate finance & climate)  
 🔹 **Introduce Lightweight Caching for Speed Boost**  
 
+<<<<<<< HEAD
 ---
+=======
+### 4. Streamlit Web Interface
+Run the web interface for an interactive experience:
+```bash
+streamlit run frontend/app.py
+```
+
+## Example Queries
+>>>>>>> a1-query
 
 ## **📌 Why Orbit-2 Matters?**  
 Orbit-2 is built for **speed and efficiency**—it cuts out unnecessary steps and focuses purely on getting **structured, accurate insights from queries as fast as possible**.  

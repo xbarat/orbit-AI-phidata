@@ -64,7 +64,44 @@ def try_int(value):
 
 class RaceResultsTransformer:
     def transform(self, endpoint: str) -> pd.DataFrame:
-        """Transform race results data from endpoint URL to DataFrame"""
+        try:
+            # Extract parameters
+            parts = endpoint.split('/')
+            if 'circuits' in parts:
+                # Handle circuit-specific pattern: /f1/circuits/{circuitId}/{year}/results.json
+                circuit_idx = parts.index('circuits') + 1
+                year_idx = circuit_idx + 1
+                if year_idx >= len(parts):
+                    print(f"Invalid circuit endpoint: {endpoint}")
+                    return pd.DataFrame()
+                    
+                circuit_id = parts[circuit_idx]
+                year = parts[year_idx]
+                return self._process_circuit_results(circuit_id, year)
+                
+            else:
+                # Standard driver/year processing
+                return self._process_driver_results(endpoint)
+                
+        except Exception as e:
+            print(f"Error processing {endpoint}: {str(e)}")
+            return pd.DataFrame()
+
+    def _process_circuit_results(self, circuit_id: str, year: str):
+        # First get all races at this circuit
+        races = self._fetch_circuit_races(circuit_id, year)
+        
+        # Then get results for each race
+        all_results = []
+        for race in races:
+            race_year = race['season']
+            round_num = race['round']
+            results = self._fetch_race_results(race_year, round_num)
+            all_results.extend(self._process_results(results))
+            
+        return pd.DataFrame(all_results)
+
+    def _process_driver_results(self, endpoint: str) -> pd.DataFrame:
         # Extract parameters from endpoint URL
         parts = endpoint.split('/')
         year = parts[5]
@@ -73,6 +110,16 @@ class RaceResultsTransformer:
         # Fetch and process data
         races = fetch_race_results(year, round_num)
         return process_results_data(races)
+
+    def _fetch_circuit_races(self, circuit_id: str, year: str):
+        # Implement the logic to fetch races at a specific circuit and year
+        # This is a placeholder and should be replaced with the actual implementation
+        return []
+
+    def _process_results(self, results):
+        # Implement the logic to process results and return a list of dictionaries
+        # This is a placeholder and should be replaced with the actual implementation
+        return []
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='F1 Results Processor')
