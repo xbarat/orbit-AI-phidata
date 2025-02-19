@@ -1,27 +1,26 @@
-# **Orbit-2: Lightweight AI Query-to-Data Pipeline**  
+### **🚀 Dojo-1.1: Lightweight AI Query-to-Data Pipeline**  
 
-## **🚀 What is Orbit-2?**  
-Orbit-2 is a **faster, streamlined version of Orbit**, focusing **exclusively on backend efficiency** using **Phidata and agentic frameworks**. Unlike its predecessor, **Orbit-2 prioritizes direct transformations** instead of complex multi-step pipelines.
+---
 
-It is designed to:  
-✅ **Map queries to the right API endpoints** (minimal API calls, optimized selection)  
-✅ **Fetch & transform data quickly** (avoids deep retrieval layers)  
-✅ **Process structured outputs directly** (no excessive pipeline overhead)  
-✅ **Ensure high retrieval accuracy with modular agents**  
+## **What is Dojo-1.1?**  
+**Dojo-1.1** is an **intermediate lightweight experiment** focused on **efficient query-to-data transformation**, optimized for **API-first AI workflows**. It builds on previous iterations by **reducing complexity, eliminating deep retrieval pipelines, and prioritizing fast, structured output processing.**  
 
-💡 **Why Orbit-2?**  
-- Eliminates **slow frontend bottlenecks**  
-- Removes **large pipelines & unnecessary retrieval steps**  
-- Focuses **purely on structured query-to-data transformation**  
+Unlike full-scale orchestration platforms, **Dojo-1.1 acts as a streamlined AI-powered API query agent**, executing **direct API interactions with high accuracy and low overhead.**  
+
+💡 **Why Dojo-1.1?**  
+✅ **Minimal API Calls** → Smart query-to-endpoint mapping eliminates redundant requests  
+✅ **Fast Data Transformations** → Uses **Pandas-based direct processing** (avoiding heavy LLM loads)  
+✅ **Lightweight & Deployable** → Modular agentic approach ensures **domain-specific customization**  
+✅ **Cross-Domain Testing** → Optimized for **F1 queries, financial data, and climate analytics**  
 
 ---
 
 ## **🔹 Key Features & System Design**  
 
-🚀 **Agentic Query Processing** → Uses **Phidata** for modular agents  
-🚀 **Fast Data Transformations** → Direct **Pandas-based** processing, avoiding LLM overhead  
-🚀 **Minimal API Calls** → Smarter **endpoint selection for efficiency**  
-🚀 **Cross-Domain Testing** → Built for **F1 queries**, tested on **finance, government, and climate data**  
+🚀 **Agentic Query Processing** → Uses **Phidata-based modular agents**  
+🚀 **Efficient Data Transformations** → Direct **NumPy/Pandas processing**, skipping multi-hop reasoning  
+🚀 **Optimized API Calls** → Ontology-driven **endpoint selection** for **query efficiency**  
+🚀 **Scalability for Domain-Specific Use Cases** → Primed for **structured API-driven data extraction**  
 
 ---
 
@@ -29,29 +28,29 @@ It is designed to:
 
 | **Capability** | **Best Accuracy** | **Challenges** |
 |---------------|------------------|---------------|
-| Query → Multi-Endpoint Selection | **100%** | Uses Ontology Mapping, Context Layer |
-| Query → DataFrame | **96%** | Uses Transform for logic for all possible API endpoint; Not Scalable but easy to deploy for domain by domain |
-| DataFrame → Analytics Code | **not tested%** |  |
+| Query → Multi-Endpoint Selection | **100%** | Relies on Ontology Mapping & Context Filtering |
+| Query → DataFrame Transformation | **96%** | Works well in domain-specific applications, but lacks universal scalability |
+| DataFrame → Analytics Code Generation | **Not Tested** | Future step for AI-driven automated reporting |
 
 ---
 
 ## **🛠️ Architecture & Workflow**  
 
-**Orbit-2 is built on a modular architecture with distinct processing agents:**  
+Dojo-1.1 is designed as a **lightweight, modular AI query agent** with distinct processing steps:  
 
 ```mermaid
 graph TD
-    A[User Query] --> B[Query Agent]
+    A[User Query] --> B[Query Processing Agent]
     B --> C[API Endpoint Selection]
-    C --> D[Data Fetching Agent]
-    D --> E[Data Processing Agent]
-    E --> F[Structured Output]
+    C --> D[Data Retrieval Agent]
+    D --> E[Data Transformation Agent]
+    E --> F[Structured Output Generation]
 ```
 
 🚀 **Key Enhancements Over Previous Versions**  
-✅ **Agent-Based Query Processing** → Handles query understanding & API mapping separately  
-✅ **Direct Data Transformation** → Avoids deep retrieval pipelines, simplifying processing  
-✅ **Optimized Endpoint Selection** → Smart filtering minimizes unnecessary API calls  
+✅ **Agent-Based Query Processing** → Handles query interpretation & API mapping separately  
+✅ **Direct Data Transformation** → No deep retrieval pipelines, simplifying processing  
+✅ **Smart API Call Optimization** → Adaptive filtering ensures **low-latency, high-relevance** results  
 
 ---
 
@@ -60,34 +59,25 @@ graph TD
 ✅ **Backend:** FastAPI, Phidata, Railway  
 ✅ **Data Processing:** Pandas, NumPy  
 ✅ **Agentic Framework:** Phidata Agents, LangChain (evaluated but not core)  
-✅ **Deployment:** Vercel (Frontend, deprecated), Railway (Backend)  
+✅ **Infrastructure & Deployment:** AWS Lambda, Railway for backend, PostgreSQL for lightweight storage  
 
 ---
+
 ## **🔮 Next Steps & Enhancements**  
 
 🔹 **Improve Query → DataFrame Accuracy** (Reduce API failures & ID mismatches)  
 🔹 **Enhance Mathematical Processing for Analytics Code**  
-🔹 **Expand API Coverage to More Domains** (Beyond F1, integrate finance & climate)  
+🔹 **Expand API Coverage to More Domains** (Beyond F1, integrate finance & climate datasets)  
 🔹 **Introduce Lightweight Caching for Speed Boost**  
 
-<<<<<<< HEAD
 ---
-=======
-### 4. Streamlit Web Interface
-Run the web interface for an interactive experience:
-```bash
-streamlit run frontend/app.py
-```
 
-## Example Queries
->>>>>>> a1-query
+## **📌 Why Dojo-1.1 Matters?**  
+Dojo-1.1 focuses on **efficiency, speed, and modularity**—it removes unnecessary LLM overhead and prioritizes **structured, real-time API-driven insights.**  
 
-## **📌 Why Orbit-2 Matters?**  
-Orbit-2 is built for **speed and efficiency**—it cuts out unnecessary steps and focuses purely on getting **structured, accurate insights from queries as fast as possible**.  
-
-📌 **Ideal for:** Data engineers, AI practitioners, and backend developers **who need quick, accurate data transformation without deep pipelines.**  
+📌 **Ideal for:** Data engineers, API developers, and AI practitioners **who need rapid, structured data transformation without deep AI orchestration.**  
 
 ---
 
 ### **💡 Final Takeaway**  
-Orbit-2 **simplifies query-to-data processing**, making it faster, **more modular**, and **more reliable** than its predecessor.
+Dojo-1.1 **is a stepping stone towards scalable API-driven AI automation**, ensuring high-speed, **domain-specific query execution** with minimal overhead. 🚀  
